@@ -48,8 +48,17 @@ family. The two systems never touch.
   red negative edge because the negative is dashed; keep the dash if you keep the pair.
 - **Ordinal means a lightness ramp, categorical means distinct hues, emphasis means weight and drawing order**, never
   a louder hue.
-- The author works in a color-blind-friendly dark terminal theme; check every palette the same way. A simulation pass
-  (deuteranopia, protanopia) on the rendered figure is Suggested, not yet tested in real work.
+- **A categorical column never takes shades of one hue.** Shades read as an order. In one schematic, cell lines in
+  four pinks and drugs in four golds were taken for numbers: "it was categorical not numerical, you killed it". Give
+  categories distinct hues and, where icons are used, a shape per variable (a cell, a pill).
+- **Gray means "not given".** In a schematic of model inputs, an icon in color is read by the model and a gray one
+  only says what the row is. Keep gray free of any other meaning in that figure.
+- **Keep categorical colors out of the hue families of the numerical scales** shown beside them. Class colors in
+  the green, blue and red families were read as viability, down and up.
+- The author works in a color-blind-friendly dark terminal theme; check every palette the same way.
+  `scripts/palette_check.py` gives the closest pairs across families and within each family in normal vision,
+  deuteranopia and protanopia (CIE76 delta E, Machado et al. 2009). Below about 20 two meanings are easy to confuse
+  in small marks. Where a collision cannot be removed, let shape or position carry the difference.
 
 ## 4. Keys
 
@@ -79,4 +88,4 @@ family. The two systems never touch.
 | legend | "label inline, kill the legend" | a shared legend across small panels; then "the legend is AI slop" for a redundant one | label inline when a panel stands alone; share a legend when series repeat; delete one that repeats the rows |
 | gray text | captions in quiet gray on the web | no gray text on slides or in figures | gray on the web only; in a LaTeX table the ± SD may be tiny gray |
 | figure tile ground | dark suggested by a reviewer agent | white demanded | white or off-white for print figures |
-| staining channel | red nucleus on black | gray on white, "max grey not black" | light gray for supplements; a recolored channel where the main figure already set one |
+| staining channel | red nucleus on black | gray on white, "max gray not black" | light gray for supplements; a recolored channel where the main figure already set one |

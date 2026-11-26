@@ -34,7 +34,7 @@ reviewer attacked, an error that one check would have caught.
 ## The registry at a glance
 
 <!-- BEGIN GENERATED map: edit tools/catalog.json, then run python3 tools/build_index.py -->
-**40 skills, 265 reference files, 232 scripts, 121 test cases with 884 graded checks.** They come as two plugins: `scicraft` (31 skills, any field) and `scicraft-ml` (9 skills, machine-learning research).
+**40 skills, 266 reference files, 234 scripts, 121 test cases with 884 graded checks.** They come as two plugins: `scicraft` (31 skills, any field) and `scicraft-ml` (9 skills, machine-learning research).
 
 The skills follow a research project from the first idea to the release:
 

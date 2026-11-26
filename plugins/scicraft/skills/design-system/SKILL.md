@@ -60,7 +60,7 @@ These hold in every medium. The per-medium tables in section 3 instantiate them.
   hairline with a large name under it (1 px `#2e2e34` on a dark page, a 0.09 cm rule on the poster). Shadows exist
   only on floating overlays (tooltip, dialog).
 - **The ground matches the data renders.** The dark web and slide ground `#141416` is the ground of the field
-  renders, "so their colours read as in the paper". Never put a white-ground figure on a dark page or the reverse
+  renders, "so their colors read as in the paper". Never put a white-ground figure on a dark page or the reverse
   ("Do not bring white background figs"): recolor it (section 5) or flip the theme.
 - **Color-blind safe.** Categories from Okabe-Ito, magnitude on one blue ramp, signed values on blue-white-red with a wide white plateau,
   never red against green. Good versus bad is a background band or a mark, never a hue pair. Section 4.
@@ -317,4 +317,5 @@ Each of these was removed at the author's request. The full list by medium with 
 - `references/machine-made.md`: the deletions list by medium with replacements, and the vocabulary for bad and good design.
 - `references/media-transfer.md`: recoloring for dark grounds, recording animations, density and audience, the static twin.
 - `scripts/units.py`: px, mm and pt at a canvas and print width; minimum size check; font-size scan.
+- `scripts/palette_check.py`: closest color pairs across and within families, in normal and color-blind views.
 - `assets/tokens.json`: all tokens, machine-readable.

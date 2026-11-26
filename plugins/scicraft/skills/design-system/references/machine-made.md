@@ -86,6 +86,9 @@ every time.
 | faint `#bbb` arrows | `#999` |
 | a slide look (shadows, pills, 3-D, gradients) | flat blocks, thin borders |
 | a cramped circuit (overlaps, no air) | budgeted white space, one flow direction |
+| a key for the whole figure for a color only one panel uses | the column header, the icon, or the caption |
+| one ellipsis across columns of different types | one group per type, each with its own ellipsis |
+| a subtitle under every small table | a title that names the task and what is held out |
 
 ## 6. Vocabulary
 

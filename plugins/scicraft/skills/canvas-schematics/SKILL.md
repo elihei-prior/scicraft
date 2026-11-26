@@ -113,7 +113,7 @@ Full list, failure gallery and the declutter standard in `references/paper-not-s
 - **Panel letters** bold lowercase with no period, top left, on one baseline with a **left-aligned
   title** of at most four words. `main.js` draws both; regions never do.
 - **All text black (`PAL.ink`), never gray.** A secondary gloss is a lighter weight; category labels
-  may take their category color. The author, of gray glosses: "no small grey font, all black". Small
+  may take their category color. The author, of gray glosses: "no small gray font, all black". Small
   step badges (`LIB.badge`) are allowed, sparingly.
 - **Every symbol is defined**, in the legend or on the object, and a symbol the reader does not need
   is deleted (section 6 for numbers).
@@ -123,6 +123,10 @@ Full list, failure gallery and the declutter standard in `references/paper-not-s
 - **Minimal beats complete**: two to four clean panels; split a figure that is trying to be two. The
   exception is an architecture overview, where the author asked for "more meat": fill the canvas
   around the core mechanism, with three zoom levels for detail.
+- **A dataset and its tasks drawn as tables** (an AnnData-style atlas, one small table per prediction
+  task): categorical columns are colored icons, numerical columns are tiles on one ramp, each column
+  type is its own group with its own ⋯, color marks what the model reads and gray what it does not.
+  The grammar and the misreadings it prevents are in `references/table-schematics.md`.
 
 ## 4. One canvas, region functions, one library
 
@@ -209,10 +213,13 @@ Full checklist in `references/qc.md`.
    overlapping text, no page or region errors, no missing font warning).
 3. `python3 scripts/ref_crops.py ref.png --canvas 1830x<H>`: within 2 %, when there is a reference.
 4. The PNG is W x 3 by H x 3 px; the PDF is one page of W/10 by H/10 mm.
-5. Open the full PNG and every region at 2 to 3 times zoom: anti-slide list, overlaps the script cannot
+5. `python3 scripts/check_clearance.py figN.pdf`: 0 fails, every warning read. It measures on ink:
+   text on or within 0.25 mm of a graphic, labels closer than 0.35 mm, shapes nearly touching, and the
+   white between panels and between table columns and rows. Its two PNGs box each flag.
+6. Open the full PNG and every region at 2 to 3 times zoom: anti-slide list, overlaps the script cannot
    see (text under a later shape), one flow, one arrowhead, legends for every meaningful color,
    letters and titles, match with the crops, mechanism against the code. Three rounds that find nothing.
-6. Report the paths and sizes, each gate's result, and what was not checked (for example the figure in
+7. Report the paths and sizes, each gate's result, and what was not checked (for example the figure in
    the compiled paper, or the comparison with the code). Rebuild every rendered file after a rename.
 
 ## 9. What was thrown out, and what replaced it
@@ -234,6 +241,11 @@ Full checklist in `references/qc.md`.
 | a filled algorithm box to fill empty space | banned after being prescribed | less canvas, or more meat in the core panel |
 | centered titles over regions; badges inline before titles | superseded by the newest master | bold letter and left-aligned title on one baseline |
 | a renderer loading puppeteer from another project's folder | broke on every other machine | `require('puppeteer')` with `package.json` beside it |
+| categorical columns as shades of one hue | "it was categorical not numerical, you killed it" | colored icons for categories, tiles for amounts (`references/table-schematics.md`) |
+| the icons removed when only their outlines were to go | "you didn't get it ... don't sabotage" | change only what was asked; recover a liked element exactly |
+| one ⋯ across columns of different types | "4/5/6 are not same type columns" | one group per type, each with its own ⋯ |
+| one key for the whole figure for a color only one task uses | "specific to 6 to all?" | the column header, the icon or the caption |
+| panels 1.5 mm apart, judged by eye | "too packed specifically between a and b" | `scripts/check_clearance.py` with a gap asked for in mm |
 
 ## Reference files
 
@@ -246,12 +258,14 @@ Full checklist in `references/qc.md`.
 - `references/real-data.md`: data as JS globals, generating structure from code, matching the implementation, exact versus schematic.
 - `references/fan-out.md`: before fanning out, the builder brief, orchestrator QA, review fan-out, sweeps.
 - `references/qc.md`: scripted gates, the eyes checklist, the report.
+- `references/table-schematics.md`: a dataset and its prediction tasks drawn as tables; categorical against numerical, column groups, read against not read, words, misreadings.
 
 Scripts (Python 3.9 or later; `ref_crops.py` needs Pillow) and assets:
 
 - `scripts/print_maths.py`: tiers and floor for any canvas width; converts px to pt.
 - `scripts/ref_crops.py`: reference size and aspect ratio, per-region crops, canvas comparison.
 - `scripts/lint_regions.py`: region contract and anti-slide lint.
+- `scripts/check_clearance.py`: clearance measured on the ink of the printed PDF (needs pymupdf, numpy, scipy, Pillow).
 - `assets/render.js` with `assets/package.json`: the renderer (Node 18 or later, puppeteer).
 - `assets/core_lib.js`, `assets/pack_arch.js`, `assets/pack_bio.js`: the library and the two packs.
 - `assets/layout_template.js`, `assets/main_template.js`, `assets/figure_template.html`,
