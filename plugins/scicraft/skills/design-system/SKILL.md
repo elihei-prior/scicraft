@@ -51,8 +51,9 @@ These hold in every medium. The per-medium tables in section 3 instantiate them.
   `'Helvetica Neue', Helvetica, Inter, Arial, sans-serif`. Vary weight, never family. Math is Latin Modern or Computer
   Modern, never sans letters. A mono face (IBM Plex Mono) appears only on the web, for one-line meta facts. In
   LaTeX use `fontspec` with the real face; the `helvet` clone looks foreign beside it. Exceptions: a document set in
-  the venue's serif keeps it, and TikZ figures inside it may take the document font so figure math and body math
-  agree; a personal homepage may use a serif pair (references/tokens-by-medium.md, section 7).
+  the venue's serif keeps it; TikZ figures are set in the TeX default (Computer Modern text and math, the rule of
+  the sibling skill `tikz-figures`), decided once per paper after a day was lost to a switch to Helvetica and back;
+  a personal homepage may use a serif pair (references/tokens-by-medium.md, section 7).
 - **One accent, given to the work's own method or term.** Web `--ours #8ec9ff`, a poster's one accent, a light teaching
   deck `#d66a2b`, a document's link color. At most one rival color (`#e69f00`) when a strongest comparator is named.
   Everything else is gray or belongs to the data. On slides the accent is never a text color.
@@ -152,7 +153,7 @@ are machine-readable in `assets/tokens.json`.
 | ink | `#2b2b2b` (bio), `#1a1a1a` (architecture); soft `#6b6b6b` only sparingly |
 | ground | white; no panel background boxes, no dividers |
 | lines | arrows `#999`, 3.5 px, head 16 px; block stroke `#3a3f47` 1.6 px; leaders `#9aa0a6`; points radius 3.0 everywhere |
-| architecture colors | four-tone by default: protagonist `#2B50AA`, fills `#9EBEE0`, target `#B8860B`, structure gray; three-accent (`#0B6FB8 #0F8C7A #D97A06`) as the alternative, chosen once per paper, rare fourth `#6D4AA7`; stop-gradient and EMA dashed; owner `canvas-schematics/references/architecture-pack.md` |
+| architecture colors | the role palette by default: ink outlines `#333333`, a pale fill names the role (token chips `#93B4D8 #F0B060 #B9A3DC #8FBFA0`, operation fills `#FBE0C2 #D8E9DF`, module gray `#E8E8EC`), the loss in red `#D93025` on `#FBE9E7` as the one saturated mark; three-accent (`#0B6FB8 #0F8C7A #D97A06`) as the alternative, chosen once per paper, rare fourth `#6D4AA7`; stop-gradient and EMA dashed; owners `tikz-figures` (vector) and `canvas-schematics/references/architecture-pack.md` (canvas themes) |
 | edge pairs | high `#FF9500` / low `#5AC8FA`; positive `#2d911b` solid / negative `#d32f2f` dashed (the dash carries the difference) |
 | render | puppeteer at 3x device scale, paired PDF and PNG, wait for a done flag plus 800 ms for fonts |
 

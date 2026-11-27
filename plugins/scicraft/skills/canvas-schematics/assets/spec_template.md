@@ -8,7 +8,7 @@ The builder contract for this figure. Every region builder reads it before writi
 - Printed width: [183] mm, canvas [1830] x [H] px, device scale 3
 - Reference: [path or "none"], aspect ratio [1.42], crops in `ref_crops/`
 - House figures to match: [paths of the paper's finished figures]
-- Packs: [arch | bio | both]; theme: [four-tone | three-accent]
+- Packs: [arch | bio | both]; theme: [pastel | three-accent]
 - Flow direction: [left to right]
 
 ## Rules (all regions)

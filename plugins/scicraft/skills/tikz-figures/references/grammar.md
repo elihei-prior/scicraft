@@ -1,266 +1,218 @@
-# The grammar: blocks, token rows, depth stacks, connectors
+# The grammar
 
-The vocabulary every architecture, method and overview figure is built from, with the
-canonical compositions. All styles and macros are in `assets/preamble.tex`; every snippet
-goes between the preamble and `\end{document}` and compiles in both themes.
+Every element of the style, the style or macro that draws it, and a compiled recipe of each. All of them are
+defined in `assets/preamble.tex`; the values and where they were measured are in `references/style.md`. Recipes
+compile behind the preamble (`scripts/compile_snippets.py`); paste one into a figure file that starts with
+`\def\figpreambleonly{}` and `\input{preamble.tex}`.
+
+Macros take a coordinate WITHOUT parentheses (`\joincircle{115,-216}` or a named coordinate `\joincircle{j}`);
+the macro adds them. Card-family recipes draw in bp (`x=1bp, y=1bp`), overview and composition recipes in cm.
 
 **Contents**
 1. The element table
-2. Blocks and sub-layers
-3. Token rows, visible and held-out
-4. Depth stacks: three idioms
-5. Arrows and connectors: the ink hierarchy
-6. Transformer block
-7. Teacher and student (JEPA two-rail layout)
-8. Mechanism inset: show the operation itself
-9. Scale spine (the Figure-1 overview)
-10. kNN ego ball and partition tree
-11. Tabular-model glyphs
-
----
+2. Boxes, wires, joins and residuals
+3. Tokens: a chip, a row, a K-deep stack, its two braces
+4. The card: the name on the border, the mini icon, two-level labels, the legend line
+5. Overview shapes: slab, D cap, query, loss, EMA, stop-gradient
+6. Crops, masks, points, zoom boxes and links, the point graph
+7. Hierarchy pieces: tree nodes and edges, isometric tiles, rails
+8. Composition pieces: tile frame, rule, title, letter
+9. The unit sphere glyph
 
 ## 1. The element table
 
-| Element | Style or macro | Use for | Rule |
-|---|---|---|---|
-| module | `block`, `nnblock` | encoder, decoder, FFN, any trained part | gray fill, rounded 2.5 to 3 pt, min height 8 to 9 mm |
-| the focal module | `block accent`, `nnblock accent` | the one trainable part the figure is about | one per figure |
-| sub-layer | `nnlayer` | LayerNorm, attention, FFN rows inside a block | thin slate outline, white fill |
-| in/out | `nnio`, `var`, `op` | inputs, outputs, operators such as plus | small circles |
-| token cell | `token`, `tokenvis`, `masktoken` via `\tokenrow` | sequences, patches, set elements | 3.4 mm squares; visible = accent, held-out = gold dashed |
-| labeled object | `chip` | one object tracked across panels | same box everywhere it appears |
-| repetition | `\nnstack`, `\StackBox`, `\opstack` | x N layers, h heads, a module shared by k inputs | 2 to 3 offset copies, count named by a brace |
-| operator box | `opbox`, `opbox accent`, `opbox map` | operator pipelines (serif look) | 1.3 pt black outline, fill encodes role |
-| data flow | `flow`, `nnarrow` | the main path | ink, 0.8 to 0.9 pt |
-| support flow | `flowfaint`, `agg`, `field` | aggregation, side inputs, fields | slate or annot, thinner |
-| weight copy | `emaarrow` | EMA update, stop-gradient | slate, densely dashed |
-| spine | `spine` | the one transport or headline arrow | 1.6 pt black |
-| zoom connector | `frustum` | zoom box to the next frame, cross-panel links | `ink!45`, 0.4 pt, dashed |
-| container | `group` + `grouptitle` | a module made of several blocks | dashed slate, title in the corner |
-| spatial frame | `frame` | a panel of real geometry | `ink!85`, 0.6 pt, rounded 2 pt |
+| Element | Style or macro | Unit |
+|---|---|---|
+| plain box (one size for all) | `\node[box]` (92 x 28 bp, `boxline` 0.45 pt, corner 1.6 bp) | bp |
+| the one operation box of a block | `\node[opbox=oppeach]`, `opmint`, `opgray` (136 x 40 bp) | bp |
+| wire with a flat-backed head, bare wire | `\draw[wire]`, `\draw[wirebare]` (0.45 pt) | any |
+| residual | `\residual{tap}{side}{join}` or `\draw[resid]` (0.40 pt) | any |
+| join circle with a plus, junction dot | `\joincircle{c}`, `\junction{c}` | any |
+| token row, K-deep stack | `\tokrow{c}{fill}{n}`, `\tokstack[rows]{c}{fill}` | any |
+| width brace, depth (count) brace | `\tokwidthbrace[rows]{c}{label}`, `\tokdepthbrace[rows]{c}{label}` | any |
+| card, name on the border | `\card{top-left}{w}{h}{name}` | bp |
+| mini icons | `\minipool{c}`, `\minimix{c}`, `\miniread{c}` | any |
+| two-level label | `\twolevel{c}{name}{gloss}` | any |
+| overview wire, EMA, bare | `\draw[flow]`, `\draw[ema]`, `\draw[flowbare]` (0.7 pt, Stealth) | cm |
+| encoder slab with a domed top | `\slab{bottom-left}{width cm}{label}` | cm |
+| predictor with a D cap | `\dcap{bottom-left}{width cm}{height cm}{label}` | cm |
+| query box, loss box | `\node[qbox]`, `\node[loss]` | cm |
+| stop-gradient slashes | `\stopgrad{c}`, `\stopgrad[90]{c}` on a horizontal wire | cm |
+| hierarchy rail, "continues below" | `\draw[rail]`, `\draw[railcont]` (0.6 pt) | bp |
+| crop frame, mask, zoom box, zoom link | `\draw[crop]`, `\draw[maskbox]`, `\draw[zoombox]`, `\draw[zoomlink]` | cm |
+| point, masked point, graph node, graph edge | `\figpoint{c}{color}`, `\figmasked{c}`, `\fignode{c}{color}`, `\draw[graphedge]` | cm |
+| tree node, tree edge, selected path | `\node[treenode]`, `\draw[treeedge]`, `\draw[treepath]` | bp |
+| isometric tile | `\isotile{center}{half-width bp}{fill}` | any |
+| raster tile with its frame | `\tile{x}{y}{width cm}{file}` | cm |
+| rule between panels, panel title, bare letter | `\draw[panelrule]`, `\paneltitle{c}{a}{Name}`, `\panelletter{c}{a}` | any |
+| unit sphere glyph | `\unitsphere{c}{radius bp}` | any |
 
-## 2. Blocks and sub-layers
+## 2. Boxes, wires, joins and residuals
+
+A pre-norm sub-block: the stream enters a LayerNorm, the operation box, then a join; the residual taps the stream
+ABOVE the norm (a junction dot), runs out to the margin and enters the join from the side that faces the margin.
+The margin lies outside the widest box of the block (here 12 bp left of the operation box), so the bypass never
+runs under a box. Arrowheads stop 1 bp short of a box.
 
 ```latex
-\begin{tikzpicture}[base, node distance=10mm]
-  \node[nnblock] (enc) {Encoder};
-  \node[nnblock accent, right=of enc] (pred) {Predictor};
-  \node[block, right=of pred] (head) {Head};
-  \draw[nnarrow] (enc) -- (pred);
-  \draw[nnarrow] (pred) -- (head);
-  \begin{scope}[on background layer]
-    \node[group, fit=(enc)(pred)] (G) {};
-  \end{scope}
-  \node[grouptitle, anchor=south west] at (G.north west) {backbone};
+\begin{tikzpicture}[x=1bp, y=1bp, paper]
+  \coordinate (in) at (80,0);
+  \coordinate (tap) at (80,-16);
+  \node[box] (ln) at (80,-48) {LayerNorm};
+  \node[opbox=opmint] (att) at (80,-104) {Multi-Head\\Self-Attention};
+  \coordinate (j) at (80,-150);
+  \coordinate (side) at (0,0);
+  \draw[wire] (in) -- ($(ln.north)+(0,1bp)$);
+  \draw[wire] (ln.south) -- ($(att.north)+(0,1bp)$);
+  \draw[wire] (att.south) -- ($(j)+(0,6.6bp)$);
+  \residual{tap}{side}{j}
+  \joincircle{j}
+  \draw[wire] ($(j)+(0,-5.6bp)$) -- (80,-178);
+  \node[note, anchor=base west] at (85,-141.5) {$W_o$};   % midway between the box and the join
 \end{tikzpicture}
 ```
 
-## 3. Token rows, visible and held-out
+## 3. Tokens: a chip, a row, a K-deep stack, its two braces
 
-`\tokenrow{(x,y)}{style}{n}{gap}` starts at `(x,y)` and steps right by `gap`. Keep the
-gap a little larger than the 3.4 mm cell so cells read as separate.
+A token is a row of cells; a set of K tokens is K rows stacked behind one another, each offset up and right. A row
+of n chips would assert a width the figure does not mean, so a set is always a stack. The width is bracketed over
+the back row and the count along the stack's own diagonal, both once, on the first glyph of the figure.
 
 ```latex
-\begin{tikzpicture}[base]
-  \tokenrow{(0,0)}{tokenvis}{5}{4.2mm}
-  \tokenrow{(21mm,0)}{masktoken}{3}{4.2mm}
-  \tokenrow{(0,-7mm)}{token}{8}{4.2mm}
-  \node[tag, anchor=east] at (-3mm,0) {context};
-  \node[tag, anchor=east] at (-3mm,-7mm) {target};
+\begin{tikzpicture}[x=1bp, y=1bp, paper]
+  \tokrow{0,0}{tokyellow}{4}
+  \node[note, anchor=base] at (0,9) {$x_i$};
+  \tokstack{70,0}{tokpurple}
+  \tokwidthbrace{70,0}{$d$}
+  \tokdepthbrace{70,0}{$K$}
+  \tokstack{150,0}{tokblue}
+  \tokstack{220,0}{tokorange}
+  \tokstack[8]{290,0}{tokblue}
+  \tokdepthbrace[8]{290,0}{$L$}
 \end{tikzpicture}
 ```
 
-## 4. Depth stacks: three idioms
+## 4. The card: the name on the border, the mini icon, two-level labels, the legend line
 
-Depth is an offset faded copy, never a blur or a shadow. Keep 2 to 3 copies; a brace
-outside the stack carries the real count.
+The card's name sits ON its top border; the border is masked by the name's own box, 3 bp to each side. The mini
+icon at the top right shows what the block does (pool: children to a parent; mix: a token and its neighborhood to
+that token; read: tiles coarse to fine to one point). A label has two levels: a black name over a gray gloss 15 bp
+under it.
 
 ```latex
-\begin{tikzpicture}[base]
-  % (a) empty shadow copies behind a labeled front block (x N layers)
-  \nnstack{(0,0)}{nnblock}{22mm}{9mm}{2}{1.4mm}{1.1mm}
-  \node[nnblock, minimum width=22mm, minimum height=9mm] at (0,0) {Block};
-  \draw[brace] (13mm,5mm) -- (13mm,-5mm) node[midway, right=5pt, tag] {$\times N$};
-  % (b) labeled faded copies in front of one another (h heads)
-  \StackBox{(38mm,0)}{block}{2}{Attention}
-  % (c) a module shared by k inputs: back copies send grey, the front sends black
-  \opstack{(70mm,0)}{$\mathcal{E}_\phi$}
-  \node[opbox accent] (c) at (92mm,0) {$\mathcal{C}$};
-  \draw[agg] ([yshift=1.6ex]opfront.east) -- ([yshift=1.6ex]c.west);
-  \draw[agg] ([yshift=0.8ex]opfront.east) -- ([yshift=0.8ex]c.west);
-  \draw[spine] (opfront.east) -- (c.west);
+\begin{tikzpicture}[x=1bp, y=1bp, paper]
+  \card{0,0}{244}{150}{Cross-Attention Pooling}
+  \minipool{200,-10}
+  \twolevel{61,-44}{queries}{$K$ seed tokens}
+  \twolevel{176,-44}{keys, values}{the set's tokens}
+  \tokstack{61,-96}{tokpurple}
+  \tokstack{176,-96}{tokblue}
+  \node[capt, anchor=base west] at (8,-140) {$K$: number of seed tokens};
+  \card{258,0}{120}{150}{Mix}
+  \minimix{333,-10}
+  \card{392,0}{120}{150}{Read}
+  \miniread{459,-12}
 \end{tikzpicture}
 ```
 
-## 5. Arrows and connectors: the ink hierarchy
-
-Black does structure, gray does support, color is never an arrow. From light to heavy:
-`field` 0.5 pt gray, `traj` 0.5 pt gray, `frustum` 0.4 pt dashed, `agg` and `flowfaint`
-0.7 pt, `flow` and `nnarrow` 0.8 to 0.9 pt ink, `spine` 1.6 pt black. Rules:
-
-- **One dominant reading direction.** Left to right, or bottom to top. Arrows that
-  double back need a reason a reader can see.
-- **Arrows end at anchors** (`(a.east)`, `(b.north)`) so they stop at the box edge and
-  never cross a label.
-- **Square corners for routed data flow** (`-|` and `|-` through one shared gutter
-  coordinate); never mix diagonals and right angles in one route.
-- **A skip connection passes behind** the box it bypasses: draw it in an
-  `on background layer` scope.
-- **Label an edge with a positioned node** (`node[above]`, `node[midway, right=4pt]`);
-  a bare `-- node {x}` sits on the line (the safety script flags it).
-
-## 6. Transformer block
-
-Sub-layers stacked inside one block, residuals as plus operators with a faint bypass,
-token rows in and out, the repeat as a stack plus a brace.
+## 5. Overview shapes: slab, D cap, query, loss, EMA, stop-gradient
 
 ```latex
-\begin{tikzpicture}[base]
-  \tokenrow{(-6.3mm,-14mm)}{token}{4}{4.2mm}
-  \nnstack{(0,9mm)}{nnblock}{26mm}{34mm}{2}{1.4mm}{1.1mm}
-  \node[nnblock, minimum width=26mm, minimum height=34mm] (B) at (0,9mm) {};
-  \node[nnlayer, minimum width=20mm] (n1) at (0,-1mm) {LayerNorm};
-  \node[nnlayer, minimum width=20mm] (at) at (0,5mm) {Attention};
-  \node[op, scale=0.7] (r1) at (0,10mm) {$+$};
-  \node[nnlayer, minimum width=20mm] (n2) at (0,15mm) {LayerNorm};
-  \node[nnlayer, minimum width=20mm] (ff) at (0,21mm) {FeedForward};
-  \draw[flow] (0,-11mm) -- (n1); \draw[flow] (n1) -- (at); \draw[flow] (at) -- (r1);
-  \draw[flow] (r1) -- (n2); \draw[flow] (n2) -- (ff);
-  \draw[flowfaint, rounded corners=2pt] (0,-4.5mm) -- (-12mm,-4.5mm) |- (r1.west);
-  \draw[flow] (ff.north) -- (0,32mm);
-  \tokenrow{(-6.3mm,34mm)}{tokenvis}{4}{4.2mm}
-  \draw[brace] (16mm,26mm) -- (16mm,-8mm) node[midway, right=5pt, tag] {$\times N$};
+\begin{tikzpicture}[paper]
+  \slab{0,0}{3.0}{context\\encoder}
+  \slab{4.6,0}{3.0}{target\\encoder}
+  \draw[ema] (3.05,0.41) -- (4.55,0.41);
+  \node[lbl] at (3.8,0.83) {EMA};
+  \dcap{0.35,1.9}{2.0}{1.06}{predictor}
+  \draw[flow] (1.5,1.19) -- (1.5,1.9);
+  \node[qbox] (q) at (-1.0,2.43) {query\\$q(A)$};
+  \draw[flow] (q.east) -- (0.35,2.43);
+  \draw[flow] (2.88,2.43) -- (7.65,2.43);
+  \node[lbl, anchor=south] at (5.3,2.5) {$\hat y$};
+  \node[loss] at (8.1,2.43) {$\mathcal{L}$};
+  % the target leaves the target slab's right side and rises into the loss from below
+  \draw[flowbare] (7.6,0.55) -- (8.1,0.55);
+  \draw[flow] (8.1,0.55) -- (8.1,2.01);
+  \stopgrad{8.1,1.2}
+  \node[lbl, anchor=west] at (8.24,1.62) {$y$};
 \end{tikzpicture}
 ```
 
-## 7. Teacher and student (JEPA two-rail layout)
+## 6. Crops, masks, points, zoom boxes and links, the point graph
 
-Two horizontal rails meeting at a latent loss on the right. Top rail: the context
-encoder (the focal, trainable block) over visible tokens, then the predictor fed the
-context and gold mask queries. Bottom rail: the EMA target encoder over the full input,
-with stop-gradient. A gray dashed EMA arrow runs from student to teacher. Held-out
-targets and mask tokens are the one gold; everything else is blue or gray. Name the
-anti-collapse term explicitly when the method has one.
+Real figures take these from `scripts/zoom_cascade.py`; this recipe shows the pieces at hand-placed positions.
 
 ```latex
-\begin{tikzpicture}[base]
-  % top rail: context encoder over visible tokens -> predictor with mask queries
-  \tokenrow{(0,12mm)}{tokenvis}{4}{4.2mm}
-  \node[nnblock accent, minimum width=18mm] (fc) at (34mm,12mm) {$f_\theta$};
-  \draw[nnarrow] (15mm,12mm) -- (fc);
-  \tokenrow{(50mm,19mm)}{masktoken}{2}{4.2mm}
-  \node[nnblock, minimum width=18mm] (g) at (70mm,12mm) {$g_\phi$};
-  \draw[nnarrow] (fc) -- (g);
-  \draw[nnarrow] (54.2mm,16.8mm) |- ([yshift=2mm]g.west);
-  \node (yh) at (90mm,12mm) {$\hat{y}$};
-  \draw[nnarrow] (g) -- (yh);
-  % bottom rail: EMA target encoder over the full input, stop-gradient
-  \tokenrow{(0,-6mm)}{token}{6}{4.2mm}
-  \node[nnblock, minimum width=18mm] (ft) at (34mm,-6mm) {$f_\xi$};
-  \draw[nnarrow] (23.5mm,-6mm) -- (ft);
-  \node (y) at (90mm,-6mm) {$\mathrm{sg}(y)$};
-  \draw[nnarrow] (ft) -- (y);
-  % EMA weight copy, student -> teacher
-  \draw[emaarrow] (fc.south) -- (ft.north) node[midway, right=2pt, tag] {EMA};
-  % rails meet at the latent loss
-  \node[op, minimum size=7mm] (L) at (104mm,3mm) {$\mathcal{L}$};
-  \draw[flow] (yh) -| (L); \draw[flow] (y) -| (L);
+\begin{tikzpicture}[paper]
+  \draw[crop] (0,0) rectangle (1.7,1.7);
+  \draw[maskbox] (0.2,0.9) rectangle (0.75,1.45);
+  \figmasked{0.4,1.2} \figmasked{0.6,1.05}
+  \figpoint{1.2,1.3}{ptblue} \figpoint{1.4,0.5}{ptochre} \figpoint{0.5,0.3}{ptpurple}
+  \draw[zoombox, rounded corners=1.5pt] (1.0,0.25) rectangle (1.5,0.75);
+  \draw[zoomlink] (1.5,0.75) -- (2.4,1.7);
+  \draw[zoomlink] (1.5,0.25) -- (2.4,0);
+  \draw[crop] (2.4,0) rectangle (4.1,1.7);
+  \draw[graphedge] (2.8,0.5) -- (3.3,1.1) -- (3.8,0.6) -- (2.8,0.5);
+  \fignode{2.8,0.5}{ptochre} \fignode{3.3,1.1}{ptblue} \fignode{3.8,0.6}{ptpurple}
 \end{tikzpicture}
 ```
 
-## 8. Mechanism inset: show the operation itself
+## 7. Hierarchy pieces: tree nodes and edges, isometric tiles, rails
 
-A mechanism figure must make the mechanism obvious, never suggestive. For attention,
-draw Q, K, V as labeled operands, the score as an operator, the output as its own node.
-Add one small inset for the one component a reader cannot guess (for example a
-relative-position bias indexed by the offset between two positions). A vague arrow labeled "attention" was rejected.
+Tree edges are Bezier curves from the parent's bottom to the child's top with vertical tangents; the selected path
+is drawn last, 1.1 pt black, and its nodes are `tilestrong`. A rail carries a level's output up the right side into
+the pooling box between two levels and the pooled tokens out of its left side up into the coarser level; a rail
+that comes from a level that is not drawn is dashed (`railcont`). Real trees, pyramids and rails come from
+`scripts/hierarchy.py`.
 
 ```latex
-\begin{tikzpicture}[base, node distance=7mm]
-  \node[var] (q) {$Q$};
-  \node[var, below=of q] (k) {$K$};
-  \node[var, below=of k] (v) {$V$};
-  \node[op, minimum size=7mm, right=14mm of k] (s) {$\cdot$};
-  \node[nnblock accent, right=10mm of s] (sm) {$\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d}}+B\right)$};
-  \node[op, minimum size=7mm, right=10mm of sm] (m) {$\times$};
-  \node[var, right=10mm of m] (o) {out};
-  \draw[flow] (q) -- (s); \draw[flow] (k) -- (s); \draw[flow] (s) -- (sm); \draw[flow] (sm) -- (m);
-  \draw[flow] (v) -| (m); \draw[flow] (m) -- (o);
-  % inset: the relative-position bias B, one cell per offset -3 .. 3
-  \begin{scope}[shift={($(sm.north)+(-10mm,3mm)$)}]
-    \foreach \x in {0,...,6}
-      \pgfmathtruncatemacro{\t}{8-2*abs(\x-3)}
-      \fill[ramp\t] (\x*3mm,0) rectangle ++(2.6mm,2.6mm);
-    \node[tag, anchor=east] at (-1mm,1.3mm) {$B$};
-  \end{scope}
+\begin{tikzpicture}[x=1bp, y=1bp, paper]
+  \foreach \x in {20,60,140} {\draw[treeedge] (80,-5.67) .. controls (80,-39) and (\x,-39) .. (\x,-72.33);}
+  \draw[treepath] (80,-5.67) .. controls (80,-39) and (100,-39) .. (100,-72.33);
+  \node[treenode, fill=tilestrong] at (80,0) {};
+  \foreach \x in {20,60,140} {\node[treenode] at (\x,-78) {};}
+  \node[treenode, fill=tilestrong] at (100,-78) {};
+  \isotile{240,-20}{40}{tilepale}
+  \isotile{220,-70}{19}{tilepale}
+  \isotile{260,-70}{19}{tilestrong}
+  % rails between two levels' rows; the dashed one rises from a level below that is not drawn
+  \tokrow{340,0}{tokorange}{5}
+  \tokrow{440,-78}{tokblue}{5}
+  \node[opbox=oppeach, minimum width=58bp, minimum height=24bp] (pool) at (390,-39) {pool};
+  \draw[railbare] (456.4,-78) -- (472,-78) -- (472,-39);
+  \draw[rail] (472,-39) -- ($(pool.east)+(1bp,0)$);
+  \draw[railbare] (pool.west) -- (310,-39) -- (310,0);
+  \draw[rail] (310,0) -- (323.6,0);
+  \draw[railcontbare] (400,-104) -- (400,-78);
+  \draw[railcont] (400,-78) -- (423.6,-78);
 \end{tikzpicture}
 ```
 
-## 9. Scale spine (the Figure-1 overview)
+## 8. Composition pieces: tile frame, rule, title, letter
 
-A left-to-right row of `frame`d panels joined by `frustum` connectors, each panel a scaled
-scope of real geometry: the whole domain as density, then resolved points, then one
-point's neighborhood. One small title above the whole figure at most; near-zero other
-text. `scripts/density_zoom.py` generates the full four-level version from a point field;
-the skeleton:
+`\tile` places a raster and draws its hairline frame on the raster's edge. This recipe stands a gray square in for
+the raster so it compiles without an image file.
 
 ```latex
-\begin{tikzpicture}[base]
-  \foreach \i/\x in {1/0, 2/4.35, 3/8.7} {
-    \begin{scope}[shift={(\x,0)}, x=1.5cm, y=1.5cm]
-      \fill[accent!8] (-1,-1) rectangle (1,1);
-      \draw[frame] (-1,-1) rectangle (1,1);
-      % \input{frag_L\i.tex}   <- generated geometry goes here
-    \end{scope}}
-  \draw[ink, line width=0.5pt] (0.3,-0.4) rectangle (0.9,0.2);   % zoom box on panel 1
-  \draw[frustum] (0.9,0.2) -- (2.85,1.5);
-  \draw[frustum] (0.9,-0.4) -- (2.85,-1.5);
-  \node[ptitle, anchor=south] at ([yshift=2mm]current bounding box.north) {one field, three scales};
+\begin{tikzpicture}[paper]
+  \paneltitle{0,4.3}{a}{Point field}
+  \node[tilelabel] at (1.75,3.95) {whole sample};
+  \fill[black!80] (0.25,0.7) rectangle (3.25,3.7);
+  \draw[tileframe] (0.25,0.7) rectangle (3.25,3.7);
+  \node[tilecount] at (1.75,0.35) {24{,}000 points};
+  \draw[panelrule] (3.8,0) -- (3.8,4.3);
+  \panelletter{4.2,4.0}{b}
 \end{tikzpicture}
 ```
 
-## 10. kNN ego ball and partition tree
+## 9. The unit sphere glyph
 
-**Ego ball.** Center dot, thin ink spokes (`egospoke`, 0.45 pt) to about 6 neighbors, a
-light gray ring (`egoring`, `black!22`), the label `$z_u$` beside the center with no
-leader line (a pointer reads as a seventh edge). Neighbors keep their own category color.
-
-```latex
-\begin{tikzpicture}[base]
-  \draw[egoring] (0,0) circle (0.95);
-  \foreach \p in {(0.9,-0.08),(0.23,0.85),(-0.64,0.64),(-0.85,-0.31),(-0.27,-0.85),(0.6,-0.6)} {
-    \draw[egospoke] (0,0) -- \p;
-    \fill[accent] \p circle (1.1pt);}
-  \fill[navy] (0,0) circle (1.5pt);
-  \node[anchor=south west, inner sep=1pt] at (0.2,0.12) {$z_u$};   % no leader line
-\end{tikzpicture}
-```
-
-**Partition tree.** Internal nodes `tnint` (circles), leaves `tnleaf` (rounded squares),
-edges `tedge`, the traced address `tpath` with `tnpath` nodes, nodes filled by depth from
-the ramp. Draw the spatial partition and its tree side by side to show that the partition
-is a tree. Generate both from the real partition code (`scripts/tikz_emit.py`); a
-hand-drawn tree and a hand-drawn partition that did not match the code were both
-rejected.
-
-## 11. Tabular-model glyphs
-
-Suggested, not yet tested in real work: the grammar above covers tabular foundation
-models with the same parts. A table is a grid of `token` cells; columns that are features
-share one fill, the target column takes `contrast`, the query targets to predict take
-`masktoken`, a missing feature value is a white cell with a dotted outline;
-training rows and query rows are separated by a `frustum` rule; row attention and column
-attention are drawn as `attn` edges along one axis each.
+The card's output glyph: an outline, an equator, one unit vector's dot. The overview's embedding-space glyph is
+generated (`scripts/sphere.py --glyph`).
 
 ```latex
-\begin{tikzpicture}[base]
-  \foreach \r in {0,...,4} \foreach \cc in {0,...,3}
-    \node[token] at (\cc*4.2mm,-\r*4.2mm) {};
-  \foreach \r in {0,...,2} \node[token, fill=contrast, draw=contrast!80!black] at (4*4.2mm,-\r*4.2mm) {};
-  \foreach \r in {3,4} \node[masktoken] at (4*4.2mm,-\r*4.2mm) {};
-  \node[token, fill=paper, draw=mist, densely dotted] at (2*4.2mm,-1*4.2mm) {};
-  \draw[frustum] (-3mm,-10.5mm) -- (20mm,-10.5mm);
-  \node[tag, anchor=east] at (-3mm,-4.2mm) {train};
-  \node[tag, anchor=east] at (-3mm,-14.7mm) {query};
+\begin{tikzpicture}[x=1bp, y=1bp, paper]
+  \unitsphere{0,0}{16}
+  \node[note, anchor=west] at (22,0) {$z_i$};
 \end{tikzpicture}
 ```

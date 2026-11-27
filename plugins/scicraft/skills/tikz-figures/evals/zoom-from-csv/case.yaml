@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: zoom-from-csv
+expected_outcome: |
+  A folder zoom_fig with a self-contained TikZ figure, its PDF and a facts file, built from scan.csv by a script (no
+  hand-typed point coordinates): the whole slice as density bands, nested crops of the same points each marked by a
+  box on the panel before it and linked to it by dashed connectors, a panel of the individual points colored by class,
+  and a k-nearest-neighbor graph with k = 6 whose neighbors were found on the full point set. The window choice
+  follows a stated rule recorded in the facts file, any randomness is seeded, and rebuilding gives the same figure.
+  The layout audit reads 0 findings or names each residue, the PNG was looked at, and at 0.98 x 396 bp no base text
+  prints under 5 pt. The final message gives caption numbers that match scan.csv and the facts file: 1,800 points,
+  820 ground, 560 vegetation and 420 building, k = 6, and the window sizes of the crops.
+context:
+  scaffold_script: place-files.sh

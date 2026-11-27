@@ -62,6 +62,6 @@ function drawRegion_a(ctx, W, H, R) {
     { shape: 'block', color: P.method, fill: P.methodFill, label: 'student path' },
     { shape: 'block', color: P.teacher, fill: P.teacherFill, label: 'teacher path' },
     { shape: 'dash', color: P.teacher, label: 'EMA weight copy' },
-    { shape: 'block', color: P.target, fill: P.paper, label: 'masked cell' },
+    { shape: 'block', color: P.mask, fill: P.paper, label: 'masked cell' },
   ], { horizontal: true });
 }

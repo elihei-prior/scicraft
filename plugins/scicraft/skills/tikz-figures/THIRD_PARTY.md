@@ -1,32 +1,20 @@
 # Third-party material
 
-## Someone else's code in this skill
+No code in this folder comes from someone else. The preamble, the kit, the scripts, the examples, the recipes and
+the eval files were written for this skill. The audit, the print-scale check, the composer and the generators
+generalize scripts the author wrote for the figures of their latest paper; `render_figure.py`,
+`check_tikz_safety.py` and `compile_snippets.py` are rewritten from the previous version of this skill, which was
+also the author's. The eval inputs (`pool_block.py`, `scan.csv`) were written and generated with a seed for the
+evals.
 
-None. Every file, macro, style definition, recipe and script in this folder was written
-for this skill or for the author's earlier figure skills, which this one replaces. In
-particular:
+| Item | Where it is used | Source | License or status |
+|---|---|---|---|
+| Okabe-Ito colors `#0072B2` and `#E69F00` (`hero`, `rival`) | `assets/preamble.tex`, plot recipes | Okabe and Ito, "Color Universal Design" (2008), through the sibling skill `data-figures` | color values, free to use; credited here |
+| the sequential ramp `ramp1` to `ramp5` | `assets/preamble.tex`, the heat matrix recipe | the sibling skill `data-figures` (its five-step rank ramp) | color values from the same package |
+| Computer Modern `cmr10` | baked scale-bar labels of `scripts/tiles.py` | shipped inside matplotlib's own data folder | not copied into this skill; used under matplotlib's distribution |
 
-- `scripts/check_tikz_safety.py` was rewritten from scratch for this skill, from a list of
-  the failures it must catch. An earlier version was described as adapted from another
-  skill's checker; none of that version's code remains.
-- The stacked-heads and residual recipes (`references/architectures.md`, sections 12 and
-  13) were redrawn from scratch in this skill's grammar. Earlier versions adapted from a
-  Stack Exchange answer (CC BY-SA) were removed.
-- The depth and token macros (`\nnstack`, `\StackBox`, `\opstack`, `\tokenrow`) were
-  rewritten for this preamble.
-
-One set of numbers comes from a library: the nine stops of the `ramp0` to `ramp8` colors
-are matplotlib's "Blues" colormap (matplotlib license, BSD-style; the colormap derives
-from ColorBrewer, Apache 2.0). Color values are data, not code.
-
-## Credited as inspiration only
-
-Ideas and conventions learned from these sources; no file, macro or script body from them
-is copied:
+Ideas credited, with no text or code copied:
 
 | Source | What was learned |
 |---|---|
-| Patrick-Healy/tikz-diagrams-skill (GitHub) | a static check before compiling; the render-and-inspect loop; presentation modes; the exact-versus-schematic distinction; a bounded repair loop; design gates for animations |
-| fraserlove/nntikz, opentikz, janosh/diagrams (GitHub) | the vocabulary of rounded module blocks, thin sub-layer rows, token cells and offset copies for depth |
-| the V-JEPA 2 paper's architecture figure | the two-rail teacher-student layout meeting at a latent loss |
-| C. Bunne, *Neural Optimal Transport*, ETH Zurich, 2023 | the serif theme is modeled on its figure style; the theme is defined by measured colors and line weights (`references/themes.md`), and no macro, style or code from the book sources is used |
+| Patrick-Healy/tikz-diagrams-skill (GitHub) | a static check before compiling; the render-and-inspect loop; the exact-versus-schematic distinction; a bounded repair loop (credit carried over from the previous version of this skill) |

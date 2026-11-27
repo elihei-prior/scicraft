@@ -1,0 +1,18 @@
+% The second tile column: the same sample's field, pooled on bins, then each point by its own value.
+% Needs preamble.tex and tiles/ next to this file; every number comes from tiles/counts.tex.
+\def\figpreambleonly{}
+\input{preamble.tex}
+\input{tiles/counts.tex}
+\graphicspath{{tiles/}}
+\begin{document}
+\begin{tikzpicture}[paper]
+\tile{3.925}{11.40}{6.90}{field_whole.png}
+\tile{2.090}{4.35}{3.30}{field_zoom.png}
+\tile{5.760}{4.35}{3.30}{field_fine.png}
+\node[tilelabel] at (3.925,15.30) {\tileBinUm\ $\mu$m bins};
+\node[tilecount] at (3.925,7.52) {\tileBinsWhole\ bins};
+\node[tilelabel] at (2.090,6.55) {\tileZoomBinUm\ $\mu$m bins};
+\node[tilelabel] at (5.760,6.55) {points};
+\node[tilecount] at (3.925,1.95) {colored by\\embedding};
+\end{tikzpicture}
+\end{document}

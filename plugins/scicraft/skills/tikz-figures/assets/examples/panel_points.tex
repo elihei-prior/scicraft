@@ -1,0 +1,20 @@
+% A tile column in the paper style (cm, the source composition's positions): the whole sample over two nested
+% zooms, a label over every tile, the count of what the whole tile shows under it, one caption at the bottom.
+% Needs preamble.tex and tiles/ (python3 scripts/tiles.py --out tiles/) next to this file. Every number comes
+% from tiles/counts.tex, written from the records.
+\def\figpreambleonly{}
+\input{preamble.tex}
+\input{tiles/counts.tex}
+\graphicspath{{tiles/}}
+\begin{document}
+\begin{tikzpicture}[paper]
+\tile{3.925}{11.40}{6.90}{points_whole.png}
+\tile{2.090}{4.35}{3.30}{points_zoom.png}
+\tile{5.760}{4.35}{3.30}{points_fine.png}
+\node[tilelabel] at (3.925,15.30) {whole sample};
+\node[tilecount] at (3.925,7.52) {\tilePointsWhole\ points};
+\node[tilelabel] at (2.090,6.55) {region};
+\node[tilelabel] at (5.760,6.55) {points};
+\node[tilecount] at (3.925,1.95) {colored by\\category};
+\end{tikzpicture}
+\end{document}

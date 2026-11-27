@@ -9,27 +9,35 @@ exists because a hand-laid diagram "overlaps, looks ugly, and does not show what
 
 ## Themes and locked semantics
 
-Colors are semantic tokens. `four-tone` is the default and `three-accent` the named alternative.
+Colors are semantic tokens. `pastel` is the default and `three-accent` the named alternative.
 Pick the theme once per paper, so a canvas Figure 1 and a TikZ figure from the `tikz-figures` skill
-match.
+match. `pastel` carries the role palette of that skill: every outline is ink, a pale fill names the
+role, and the loss is the one saturated mark.
 
-| Token | `four-tone` (default, newest) | `three-accent` | Means |
+| Token | `pastel` (default, newest) | `three-accent` | Means |
 |---|---|---|---|
-| `PAL.method`, `methodFill` | `#2B50AA` dark blue | `#0B6FB8` blue | method, student, forward path (the protagonist) |
-| `PAL.teacher`, `teacherFill` | `#5A5F6B` slate, dashed EMA in gray | `#0F8C7A` teal | teacher, EMA copy |
-| `PAL.target`, `targetFill` | `#B8860B` gold | `#D97A06` amber | target, held-out, the one contrast |
-| `PAL.methodLight`, `targetLight` | `#9EBEE0`, `#E8D6A0` | lighter tints | fills, halos |
+| `PAL.method`, `methodFill` | ink `#333333` on peach `#FBE0C2` | `#0B6FB8` blue | method, student, forward path |
+| `PAL.teacher`, `teacherFill` | ink `#333333` on gray `#E8E8EC`, dashed EMA in ink | `#0F8C7A` teal | teacher, EMA copy |
+| `PAL.target`, `targetFill` | red `#D93025` on `#FBE9E7` | `#D97A06` amber | loss, target, the one contrast |
+| `PAL.mask` | dashed gray `#999999` | the target color | outline of a masked or held-out cell |
+| `PAL.mark`, `markFill` | ink on yellow `#F5D36B` | the target color, 16% fill | the highlighted cell of a partition |
+| `PAL.tok` | chips `#93B4D8`, `#F0B060`, `#B9A3DC`, `#8FBFA0`, `#F5D36B` | saturated hues | token fills by kind |
+| `PAL.methodLight`, `targetLight` | `#F0B060`, `#FBE9E7` | lighter tints | fills, halos |
 
 ```js
 LIB.setArchTheme('three-accent');   // before any drawing, in the first region or in main.js
 ```
 
-- **One accent, one meaning, in every panel and every figure of the paper.** Gold (or amber) marks
-  only the focal, held-out or target thing. If a third saturated hue appears, delete it.
+- **One contrast, one meaning, in every panel and every figure of the paper.** Red (or amber in
+  `three-accent`) marks only the loss or the target. If a second saturated hue appears, delete it.
+- **A fill names a role and keeps it.** In `pastel` a token color names a kind of token and a block
+  fill a kind of module, in every panel of the paper.
 - **Structure is gray, data is color.** Data points stay neutral (`PAL.greyPt`), never rainbow.
 - Matrices use the neutral ramps with black text (`LIB.rank`, `LIB.delta`).
-- The `methodFill` and `targetFill` tints of the four-tone theme are light versions of its two hues,
-  chosen for block fills. Check them against the TikZ figures of the same paper.
+- The fills of the `pastel` theme are the measured fills of the TikZ figures (`tikz-figures`). Check a
+  canvas figure against the TikZ figures of the same paper before it ships. The `pastel` theme was
+  rendered once with `assets/region_example_arch.js` (0 text under 18 px, 0 overlapping pairs); it has
+  not yet been used in a paper.
 
 ## Primitives
 

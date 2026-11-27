@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: training-overview-figure
+expected_outcome: |
+  A folder fig1 with a standalone TikZ source and its compiled PDF (plus a preview PNG that was looked at) showing the
+  training scheme as one overview: the input as crops of one point field, the context view being the same crop with
+  dashed masked blocks, a context encoder and a target encoder as two modules of one shape, a dashed EMA wire from
+  the context encoder to the target encoder, a predictor that takes the context encoder's output and a query for the
+  masked block's position, and exactly one loss box where the prediction and the target embedding meet, with
+  stop-gradient slashes on the target's wire into it. No legend, no second loss, no sentences inside the figure. The
+  points are generated with a seed or by a script, the type is Computer Modern with default math, and at half of a
+  396 bp text width no base text prints under 5 pt. The final message gives the print width the figure was checked
+  at and says what was not checked.

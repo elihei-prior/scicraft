@@ -1,126 +1,119 @@
-# Generator-driven geometry and deterministic randomness
+# Generators and determinism
 
-Any tree, partition, graph, point cloud, density, trajectory or embedding that stands for
-what a method computes is produced by the method's own code and emitted as TikZ. A
-figure built this way cannot misstate the method, and it rebuilds identically.
+Every structural element of a figure that claims something about real geometry (a tree, a partition, a graph,
+which points are neighbors, a direction, a length) is computed by the method's own code on a fixed-seed input and
+emitted as TikZ, with every number it shows written to `facts.json`. A hand-drawn tree was called "some random
+tree"; a uniform grid drawn as an adaptive partition misstated the method; a zoom whose levels were re-sampled
+showed neighbors that came from nowhere.
 
 **Contents**
-1. Why: what went wrong without it
-2. The pattern: gen_<figure>.py
-3. The shipped generators
-4. Two datasets: a hero set and a toy set
-5. Deterministic randomness
-6. Emitting TikZ that compiles
-7. facts.json: the numbers the figure shows
+1. The pattern
+2. The shipped generators
+3. The kit for emitting TikZ
+4. Seeds and stated rules
+5. Emitting TikZ that compiles and audits
+6. facts.json
+7. Iterate with \input, deliver inlined
 8. When the real code cannot run here
 
----
-
-## 1. Why: what went wrong without it
-
-- A concept figure carried a hand-drawn tree ("some random tree") and a hand-drawn
-  partition that did not match what the code computes. Both were replaced by geometry
-  generated from the real backend.
-- A zoom cascade re-sampled points per level; the clump in one frame had no relation to
-  the next. One field with nested crops fixed it.
-- A scatter used `rand` without a seed and moved on every compile, so two versions of the
-  same figure disagreed.
-- A sphere graticule computed in an inline `\foreach` failed with "Unknown operator 'a'";
-  computed in Python and emitted to a file, it compiled.
-
-## 2. The pattern: gen_<figure>.py
+## 1. The pattern
 
 ```
 figures/<figure>/
-├── gen_<figure>.py     imports the real function, runs it on a fixed-seed input
-├── frag/               frag_*.tex written by the generator (coordinates only)
-├── facts.json          every number the figure shows or depends on
-├── body.tex            frames, labels, connectors; \input{frag/...} while iterating
-└── <figure>.tex        preamble + body with fragments inlined: the delivered file
+  gen_<figure>.py     imports the method's own function, runs it on a seeded input, writes the fragments
+  frag/*.tex          TikZ fragments in local coordinates
+  facts.json          every number the figure shows or depends on, and every rule that chose something
+  <figure>.tex        the figure: preamble, layout, \input{frag/...}
 ```
 
-1. Import the backend function (the partitioner, the tokenizer, the graph builder, the
-   sampler). Do not reimplement it for the figure: a reimplementation drifts from the
-   code the paper describes. If the package import pulls heavy dependencies, copy the one
-   function out with a comment naming its source and version.
-2. Run it on a fixed-seed synthetic input, or on a small real sample chosen by a stated
-   rule (scan by rank, check that the dramatic case is not an artifact).
-3. Write coordinates in a local frame (`[-1,1]^2` is the convention here) so a fragment
-   drops into `\begin{scope}[shift=(..), x=..cm, y=..cm]`.
-4. Write `facts.json` beside the fragments.
-5. Build panels one at a time, as a narrative, and look at each before the next.
+Two inputs when needed: a hero set (about 230 points) for density, and a toy set (about 50 points) for a tree or an
+address a reader follows. Panels come in one at a time, each signed off before the next.
 
-The emitters in `scripts/tikz_emit.py` (`points`, `rects`, `segments`, `smooth_cycle`,
-`tree`, `write_frag`, `write_facts`) are importable:
+## 2. The shipped generators
 
-```python
-import sys; sys.path.insert(0, "path/to/skill/scripts")
-from tikz_emit import points, rects, tree, write_frag, write_facts
-from mymethod.partition import build_tree          # the real backend
-cells, nodes, edges = build_tree(xy, capacity=4)   # your function's own output
-write_frag(Path("frag/partition.tex"), rects(cells, "celledge") + points(xy, "ptdot", 0.9))
-```
-
-## 3. The shipped generators
-
-| Script | Produces | Run |
+| Script | What it computes | Checks it runs |
 |---|---|---|
-| `scripts/density_zoom.py` | a four-level zoom: KDE bands, density window, points, kNN ego ball, from one field; `facts.json`; a self-contained `fig.tex` | `python3 scripts/density_zoom.py --out zoom/ --preamble assets/preamble.tex` |
-| `scripts/tikz_emit.py` | the emitter library, and a worked example: an adaptive quadtree on a seeded toy set, drawn as the partition and as its tree with one address traced | `python3 scripts/tikz_emit.py --out frags/ --preamble assets/preamble.tex` |
+| `scripts/hierarchy.py` | a quadtree over seeded points, its tree, the isometric pyramid, the rows with rails, the point graph | the selected path is the tile holding the selected point at every level |
+| `scripts/sphere.py` | von Mises-Fisher clusters on a sphere, density rings, the composition of two sets' resultants, the overview glyph | additivity, the projected parallelogram closes, the diagonal's length is R_A, the projection is radial, the angles add up |
+| `scripts/zoom_cascade.py` | one point field's field, region, crop and k-nearest-neighbor graph, the masked views | neighbors on the full field; edges clipped at the frame by the generator |
+| `scripts/tiles.py` | raster tiles of one synthetic sample, pooled bins, baked scale bars | every printed count from the records; baked label size at print |
+| `assets/examples/block_cards.py` | two block cards through the kit | the card names fit (two passes) |
 
-In the quadtree example, `build_partition()` is a stand-in: replace it with an import of
-the method's own partition function and keep the emitters. Both scripts take `--seed`,
-print what they built, and exit non-zero when a check fails (`density_zoom.py` fails if
-any neighbor of the ego falls outside the last frame).
+Each takes a CSV or a seed, writes `facts.json`, and answers `--help`. Replace the example computation (the
+quadtree in `hierarchy.py`, the synthetic field in `zoom_cascade.py`) with an import of your own function and keep
+the drawing.
 
-## 4. Two datasets: a hero set and a toy set
+## 3. The kit for emitting TikZ
 
-Use two inputs when a figure has both dense and legible panels: a "hero" set (about 230
-points in the original figure) for density panels, and a "toy" set (about 50 points) for
-trees and addresses a reader must be able to follow node by node. Both are seeded and
-both are named in `facts.json`.
+`assets/figkit.py` (standard library) reads every size from the preamble and emits TikZ in bp with y downward:
 
-## 5. Deterministic randomness
+| Call | Draws |
+|---|---|
+| `Figure(w, h, style=None, names={})` | a picture of w x h bp; `tex()`, `write(path)` |
+| `box(x, y, label, w, h, fill, pt)`, `opbox(x, y, label, fill)` | the plain box, the operation box; return (top, bottom) |
+| `tokens(xc, y, fill, rows, cols)`, `tok_top`, `tok_bot`, `tok_right` | a K-deep stack; where arrows stop and start |
+| `width_brace`, `depth_brace`, `brace` | the stack's width, its count, any brace with a gray label |
+| `arrow`, `line`, `join`, `junction`, `residual` | wires, the join circle, the dot, the pre-norm bypass |
+| `card(ox, top, w, h, name)`, `mini(kind, ox, w, y0)`, `two_level` | the card with its name on the border, the icon, a name over its gloss |
+| `text`, `note` | black text, gray secondary text |
+| `Style.from_preamble().scaled(...)`, `Stations().replace(...)` | sizes changed together; shared stations |
+| `build(make, tex)` | two passes: compile, measure the card names, compile again |
 
-- **In Python:** `numpy.random.default_rng(seed)` or `random.Random(seed)`, the seed a
-  command-line argument with a default, and the seed written to `facts.json`.
-- **In TikZ:** `\pgfmathsetseed{N}` before every loop that uses `rand` or `rnd`. A loop
-  that must produce the same jitter for several panels sets the seed inside the panel
-  (`\pgfmathsetseed{\k*97+\j}`). The safety script warns when `rand` appears without a
-  seed.
-- **Prefer coordinates over runtime randomness** for a figure that will be kept: emit the
-  points once from Python. PGF's generator can change between TeX versions; a file of
-  coordinates cannot.
-- **The same cloud perturbed, never a new cloud.** In an animation or a before-after pair,
-  seed once and perturb the same base pattern.
-- **In a canvas or JavaScript figure** the same rule holds with a seeded generator; see
-  `canvas-schematics`.
+## 4. Seeds and stated rules
 
-## 6. Emitting TikZ that compiles
+- **Every random choice has a seed**: `numpy.random.default_rng(seed)` in Python, `\pgfmathsetseed{N}` before any
+  `rand` in TikZ. The seed goes into `facts.json`. An unseeded `rand` moved the figure on every compile.
+- **Every showcase choice has a stated rule** in the code and in `facts.json`: the window with the highest category
+  entropy, the point nearest the center of the field, the pair whose resultant length lies in a window, the
+  center point whose neighbors surround it. A choice made by eye is a choice a reviewer can call cherry-picked.
+- **A chosen example is checked for being an artifact** (an edge of the domain, an empty window, a cluster that
+  exists only at this seed) before it is drawn.
 
-- `plot[smooth cycle, tension=0.6] coordinates {(x,y) (x,y) ...}`: points separated by
-  spaces. Joining them with `--` fails with "Cannot parse this coordinate".
-- Three decimals are enough at figure scale and keep files small.
-- Draw density bands lightest first and the core last.
-- Keep dot radii in pt (`circle (0.8pt)`) so they do not scale with the frame; keep paths
-  in frame units so they do.
-- Compute anything with `and` in it (ellipse radii, per-point sizes) in Python.
-- Emit style names from the preamble (`ptdot`, `celledge`, `tnint`, `tnleaf`, `tedge`,
-  `tpath`, `tnpath`, `egoring`, `egospoke`), never
-  raw hex colors, so the theme switch still applies.
+```latex
+\begin{tikzpicture}[paper]
+  \pgfmathsetseed{7}
+  \draw[crop] (0,0) rectangle (2,2);
+  \foreach \k in {1,...,40} {\figpoint{{0.1+1.8*rnd},{0.1+1.8*rnd}}{ptblue}}
+\end{tikzpicture}
+```
 
-## 7. facts.json: the numbers the figure shows
+## 5. Emitting TikZ that compiles and audits
 
-Every number drawn in the figure or quoted in its caption (point counts, k, a radius,
-depth, number of leaves, a selection rule) is read from `facts.json`, never retyped.
-Before hand-over, compare each number in the caption and in the figure with the file.
-Where a showcase example was selected (an ego point, a window, a sample), record the rule
-and the candidates it was chosen from.
+- **Coordinates in bp, the page is the figure** (`border=0`, `\useasboundingbox` from (0,0)), so an audit finding at
+  (x, y) is the generator's (x, y). TeX points differ from bp by 0.375 percent, enough to slide a patch.
+- **Fixed decimals** (`f"{x:.3f}"`); `plot[smooth cycle] coordinates` separated by spaces, never by `--`.
+- **Clip in the generator.** A segment hidden under a TikZ clip is still in the PDF; clip it before emitting
+  (Liang-Barsky in `zoom_cascade.py`), and drop a node whose disk would cross the frame.
+- **Compute what TikZ cannot do safely.** A `\foreach` with `\pgfmathsetmacro` concatenated numbers in an ellipse
+  radius and failed ("Unknown operator 'a'"); a projected graticule needs a visibility test per point. Compute in
+  Python and emit coordinates.
+- **Name what another figure will attach to**: fragments name their corners (`\coordinate (crop-nw)`), so links
+  are drawn between named coordinates wherever the fragment is placed.
+- **Text the layout depends on is measured, not guessed**: `figkit.build()` compiles, reads the ink width of each
+  card name from the PDF and compiles again. A label width guessed for one font is wrong in another (a corner label
+  reserved at 2.16 cm in a sans font was 2.57 cm in Computer Modern).
+
+## 6. facts.json
+
+Every number the figure or its caption shows (counts, k, radii, seeds, window centers, the rule that chose each
+example, check results) is written by the generator. The caption's numbers are copied from `facts.json`, and the
+final check compares them. A tile's count (`tiles/counts.tex`) is read into the figure as a macro, so no count is
+typed by hand.
+
+## 7. Iterate with \input, deliver inlined
+
+While iterating, the figure reads its fragments with `\input{frag/...}` so a regenerated fragment takes effect
+(appending a generated body once with `cat >>` froze a copy that later runs did not update). To deliver:
+
+```bash
+python3 scripts/render_figure.py figure.tex --texinputs <skill>/assets --inline figure_final.tex
+```
+
+It replaces every `\input` by the file's text (the preamble contributes only its header), writes
+`figure_final.tex`, and compiles it alone in an empty folder. A figure that needs files the user does not have is not
+delivered. Generated figures can reach about 0.5 MB of coordinates; say so when delivering.
 
 ## 8. When the real code cannot run here
 
-If the backend needs hardware or data that are not available (a cluster, a GPU, a large
-private dataset), run the generator where it can run, commit the fragments and
-`facts.json`, and build the figure from those files. Say in the hand-over which
-fragments were generated where. Never substitute hand-drawn geometry and present it as
-the method's output; if it must be hand-drawn, it is schematic and is marked so.
+Say so, and draw from the code's output instead (a CSV the user exports), or mark the figure schematic: no
+measured-looking ticks, no exact lengths, the caption says "schematic". Never invent geometry that looks computed.

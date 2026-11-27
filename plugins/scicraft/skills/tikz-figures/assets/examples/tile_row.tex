@@ -1,0 +1,16 @@
+% A row of tiles in the paper style: one field pooled at four pitches, for two windows. Tiles 3.48 cm at a
+% pitch of 3.67 cm, 0.36 cm more between the two windows, a label over each tile at 13.5 pt, hairline frames.
+% The scale bar is baked into the first tile. One color mapping for every tile, so a coarser tile is the same
+% field read at a coarser pitch. A window is 8 bins of the coarsest pitch wide and lies inside the sample, so no
+% tile shows a cut bin or the ground. Needs preamble.tex and tiles/ (scripts/tiles.py) next to this file.
+\def\figpreambleonly{}
+\input{preamble.tex}
+\graphicspath{{tiles/}}
+\begin{document}
+\begin{tikzpicture}[paper]
+\foreach \x/\w/\p in {2.875/1/80, 6.545/1/40, 10.215/1/20, 13.885/1/10,
+                      17.915/2/80, 21.585/2/40, 25.255/2/20, 28.925/2/10} {
+  \tile{\x}{0}{3.48}{ladder_\w_\p.png}
+  \node[tilelabel] at (\x,2.20) {\p\ $\mu$m};}
+\end{tikzpicture}
+\end{document}

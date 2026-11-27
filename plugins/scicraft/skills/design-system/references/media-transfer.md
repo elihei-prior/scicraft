@@ -68,7 +68,7 @@ The audience changes the order, the formulas and the amount of background, never
 
 - **Machine-learning audience** (a conference paper, rebuttal figures, a poster at an ML venue): the paper's math is
   kept and typeset (definitions, a boxed core equation, the labeled loss); architectures are flat block diagrams
-  with locked semantics (four-tone by default: dark blue protagonist, light blue fills, gold target, gray structure;
+  with locked semantics (the role palette by default: ink outlines, pale fills that name the role, a red loss box;
   three-accent student blue, teacher teal, target amber as the alternative; dashed stop-gradient and EMA); benchmark results
   are rank heat maps with the value in each cell, and ratings as a dot with the value printed, the bootstrap IQR in the appendix table.
 - **Domain audience** (clinicians, biologists, leadership): open with the raw data shown whole, then its scales;

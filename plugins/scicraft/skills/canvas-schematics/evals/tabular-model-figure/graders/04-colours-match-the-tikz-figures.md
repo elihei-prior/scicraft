@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The figure uses dark blue #2B50AA and gold #B8860B (for example the four-tone theme of the architecture pack), and does not introduce a third saturated accent such as teal or red.
+The figure uses dark outlines with pale fills (peach #FBE0C2 for the student blocks, gray #E8E8EC for the teacher) and red #D93025 only for the loss (for example the pastel theme of the architecture pack), and does not introduce a second saturated accent such as teal, dark blue or gold.

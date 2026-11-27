@@ -10,8 +10,10 @@
  * Colours are SEMANTIC tokens, set by a theme:
  *   PAL.method / methodFill   method, student, forward path
  *   PAL.teacher / teacherFill teacher, EMA copy
- *   PAL.target / targetFill   target, held-out, emergent read-out (the one contrast)
- * Call LIB.setArchTheme('four-tone') or ('three-accent') before drawing.
+ *   PAL.target / targetFill   target, loss, emergent read-out (the one contrast)
+ *   PAL.mask                  outline of a masked or held-out cell
+ *   PAL.mark / markFill       the highlighted cell of a partition
+ * Call LIB.setArchTheme('pastel') or ('three-accent') before drawing.
  * ===================================================================== */
 (function () {
   'use strict';
@@ -19,13 +21,15 @@
   const PAL = window.PAL, FONT = window.FONT, LIB = window.LIB;
 
   const THEMES = {
-    // Sans four-tone theme: matches TikZ figures drawn in the same house palette.
-    'four-tone': {
-      method: '#2B50AA', methodFill: '#E3ECF7', methodLight: '#9EBEE0',
-      teacher: '#5A5F6B', teacherFill: '#EEF0F3',
-      target: '#B8860B', targetFill: '#F6EDD3', targetLight: '#E8D6A0',
-      extra: '#6E7681',
-      tok: ['#2B50AA', '#9EBEE0', '#B8860B', '#E8D6A0', '#C9CED6'],
+    // Pastel theme: the role palette of the vector figures from the sibling skill tikz-figures.
+    // Every outline is ink and the fill names the role; the loss is the one saturated mark.
+    'pastel': {
+      method: '#333333', methodFill: '#FBE0C2', methodLight: '#F0B060',
+      teacher: '#333333', teacherFill: '#E8E8EC',
+      target: '#D93025', targetFill: '#FBE9E7', targetLight: '#FBE9E7',
+      extra: '#666666',
+      mask: '#999999', mark: '#333333', markFill: '#F5D36B',
+      tok: ['#93B4D8', '#F0B060', '#B9A3DC', '#8FBFA0', '#F5D36B'],
     },
     // Three-accent theme: blue student, teal teacher, amber target.
     'three-accent': {
@@ -40,9 +44,12 @@
   LIB.archThemes = THEMES;
   LIB.setArchTheme = function (name) {
     const t = THEMES[name]; if (!t) throw new Error('unknown theme ' + name + '; use ' + Object.keys(THEMES).join(' or '));
-    Object.assign(PAL, t); PAL.archTheme = name; return name;
+    Object.assign(PAL, t);
+    // Optional tokens fall back to the target colour, so a theme that names none keeps one contrast.
+    PAL.mask = t.mask || t.target; PAL.mark = t.mark || t.target; PAL.markFill = t.markFill || LIB.alpha(t.target, 0.16);
+    PAL.archTheme = name; return name;
   };
-  LIB.setArchTheme('four-tone');
+  LIB.setArchTheme('pastel');
 
   // FLAT module block. opt {label, sublabel, fill, stroke, lw, radius, labelColor, labelSize, weight, dash, italic, mono}
   LIB.block = function (ctx, x, y, w, h, opt) {
@@ -97,7 +104,7 @@
       for (let c = 0; c < cols; c++) {
         const px = x + c * (cw + g), py = y + r * (ch + g), masked = opt.masked && opt.masked(r, c);
         ctx.fillStyle = masked ? PAL.paper : (opt.fill ? opt.fill(r, c) : PAL.fillNeutral);
-        ctx.strokeStyle = masked ? (opt.maskStroke || PAL.target) : (opt.stroke || PAL.guide); ctx.lineWidth = masked ? 1.4 : 1; ctx.setLineDash(masked ? [3, 2] : []);
+        ctx.strokeStyle = masked ? (opt.maskStroke || PAL.mask) : (opt.stroke || PAL.guide); ctx.lineWidth = masked ? 1.4 : 1; ctx.setLineDash(masked ? [3, 2] : []);
         ctx.fillRect(px, py, cw, ch); ctx.strokeRect(px, py, cw, ch);
       }
     }
@@ -132,8 +139,8 @@
         rec(x, y, hw, hh, node[0], depth + 1, p + '1'); rec(x + hw, y, hw, hh, node[1], depth + 1, p + '2');
         rec(x, y + hh, hw, hh, node[2], depth + 1, p + '3'); rec(x + hw, y + hh, hw, hh, node[3], depth + 1, p + '4');
       } else if (opt.highlight && p === opt.highlight) {
-        ctx.save(); ctx.fillStyle = LIB.alpha(PAL.target, 0.16); ctx.fillRect(x, y, w, h);
-        ctx.strokeStyle = PAL.target; ctx.lineWidth = 1.8; ctx.strokeRect(x, y, w, h); ctx.restore();
+        ctx.save(); ctx.fillStyle = PAL.markFill; ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = PAL.mark; ctx.lineWidth = 1.8; ctx.strokeRect(x, y, w, h); ctx.restore();
       }
     })(x, y, w, h, spec, 0, '');
     ctx.restore();

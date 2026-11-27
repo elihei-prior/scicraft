@@ -48,7 +48,7 @@ Collect by reading the project:
   guardrail or narrative file add to the project's and never relax them.
 
 Ask in one message for what is missing: the printed width, the reference, the claim of each panel,
-and whether a TikZ figure of the same paper exists (the canvas theme matches it; four-tone by
+and whether a TikZ figure of the same paper exists (the canvas theme matches it; `pastel` by
 default, section 4).
 
 Work in a folder of its own beside the paper's figures (layout in `references/library.md`).
@@ -144,10 +144,10 @@ single style lever: "if it can't be slidy, the agents can't be slidy." API in `r
   elbows, flat frames, badges, heatmaps, strips, color bars, points with halos, legends.
 - **Architecture pack** (`references/architecture-pack.md`): blocks, token rows, table cell grids,
   tensor stacks, towers, quadtrees, trees, dashed EMA arrows, stop-gradient marks, braces; semantic
-  colors (method, teacher, target) under two themes. `four-tone` is the default (`#2B50AA`
-  protagonist, `#9EBEE0` fills, `#B8860B` the one contrast, grays for structure), matched by
-  `tikz-figures`; `three-accent` (`#0B6FB8`, `#0F8C7A`, `#D97A06`) is the named alternative, chosen
-  once per paper. An ML architecture figure goes to `tikz-figures` by default (section 0); use this
+  colors (method, teacher, target) under two themes. `pastel` is the default (ink outlines
+  `#333333`, peach `#FBE0C2` method fills, gray `#E8E8EC` teacher fills, red `#D93025` for the loss
+  as the one contrast), matched by `tikz-figures`; `three-accent` (`#0B6FB8`, `#0F8C7A`, `#D97A06`)
+  is the named alternative, chosen once per paper. An ML architecture figure goes to `tikz-figures` by default (section 0); use this
   pack when the user asks for canvas.
 - **Biology pack** (`references/biology-pack.md`): cells with character, white halos, nuclei,
   molecules of radius 3.0, organic dashed masks, cluster masks, ghost cells, color by cluster, one

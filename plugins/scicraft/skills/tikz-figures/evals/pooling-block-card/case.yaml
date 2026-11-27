@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: pooling-block-card
+expected_outcome: |
+  A folder fig_pool with card.tex and card.pdf compiled from it (and a preview PNG that was looked at), drawing SetPool
+  from pool_block.py as one block card read top to bottom: the K learned seeds and the n set tokens as stacks of rows
+  with their width and count bracketed, two separate LayerNorm boxes (norm_q on the seeds, norm_kv on the set) before
+  one pastel-filled attention box, a residual that taps the seed stream before its norm and joins after the
+  attention, a second LayerNorm and an MLP with its own residual, and the conditioning vector c entering through its
+  projection as a join on the output, the output being K tokens. Every box except the attention box is white with a
+  thin dark outline, the card's name sits on its top border, wiring is orthogonal, the type is Computer Modern with
+  default math, and printed at 0.98 x 396 bp no base text is under 5 pt. The layout audit reads 0 findings or names
+  each residue. The final message says what the card does not show (the padding mask) and what was not checked.
+context:
+  scaffold_script: place-files.sh

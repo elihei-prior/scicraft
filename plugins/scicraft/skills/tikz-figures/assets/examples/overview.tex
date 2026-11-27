@@ -1,0 +1,65 @@
+% Training overview in the paper style, written by hand in cm as the source overview was.
+% A teacher-student scheme: two masked views of one crop enter a context encoder; a predictor, asked by a query,
+% predicts into the embedding space; the target encoder (an EMA copy of the context encoder) sees the crop and
+% gives the target; one loss box compares the two, with a stop-gradient on the target's riser.
+%
+% Needs, next to this file: preamble.tex, and frag/ written by
+%   python3 scripts/zoom_cascade.py --out frag/ --views     (the cascade and the two masked views)
+%   python3 scripts/sphere.py --out frag/ --glyph           (the embedding-space glyph)
+% Deliver it inlined: python3 scripts/render_figure.py overview.tex --inline overview_final.tex
+\def\figpreambleonly{}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}[paper]
+% ---- bottom row: the zoom cascade over one point field
+\begin{scope}[shift={(2.01,1.23)}, x=0.90cm, y=0.90cm]\input{frag/frag_field.tex}\end{scope}
+\begin{scope}[shift={(4.93,1.23)}, x=1.05cm, y=1.05cm]\input{frag/frag_region.tex}\end{scope}
+\begin{scope}[shift={(7.75,1.23)}, x=1.05cm, y=1.05cm]\input{frag/frag_crop.tex}\end{scope}
+\begin{scope}[shift={(10.68,1.23)}, x=1.05cm, y=1.05cm]\input{frag/frag_graph.tex}\end{scope}
+\draw[zoomlink] (field-box-ne) -- (region-nw);   \draw[zoomlink] (field-box-se) -- (region-sw);
+\draw[zoomlink] (region-box-ne) -- (crop-nw);    \draw[zoomlink] (region-box-se) -- (crop-sw);
+\draw[zoomlink] (crop-box-ne) -- (graph-nw);     \draw[zoomlink] (crop-box-se) -- (graph-sw);
+\node[lbl] at (2.01,-0.42) {field};
+\node[lbl] at (4.93,-0.42) {region};
+\node[lbl] at (7.75,-0.42) {crop};
+\node[lbl] at (10.68,-0.42) {point graph};
+\node[glossnote] at (10.68,-0.95) {$k$ nearest neighbors};
+
+% ---- inputs: the crop twice, masked two ways
+\begin{scope}[shift={(1.95,4.75)}, x=0.85cm, y=0.85cm]\input{frag/frag_view_block.tex}\end{scope}
+\begin{scope}[shift={(4.65,4.75)}, x=0.85cm, y=0.85cm]\input{frag/frag_view_category.tex}\end{scope}
+\node[lbl] at (1.95,3.40) {spatial};
+\node[lbl] at (4.65,3.40) {category};
+% the crop feeds both views and the target encoder; orthogonal wiring only
+\draw[flowbare] (7.75,2.28) -- (7.75,2.80);          % starts on the crop frame (top at 1.23 + 1.05)
+\draw[flow] (7.75,2.80) -- (0.55,2.80) -- (0.55,4.75) -- (1.06,4.75);
+\draw[flow] (6.05,2.80) -- (6.05,4.75) -- (5.54,4.75);
+\draw[flow] (7.75,2.80) -- (9.80,2.80) -- (9.80,6.25);
+
+% ---- encoders: slabs with a domed top; the target is an EMA copy of the context encoder
+\slab{1.53,6.28}{3.35}{context\\encoder}
+\slab{8.28,6.28}{3.05}{target\\encoder}
+\draw[flow] (1.95,5.60) -- (1.95,6.28);                % starts on the view frame (top at 4.75 + 0.85)
+\draw[flow] (4.65,5.60) -- (4.65,6.28);
+\draw[ema] (4.93,6.69) -- (8.24,6.69);
+\node[lbl] at (6.56,7.11) {EMA};
+
+% ---- the prediction: a query asks the predictor; the answer lands in the embedding space
+\dcap{2.38,8.72}{2.31}{1.06}{predictor}
+\draw[flow] (3.80,7.47) -- (3.80,8.72);
+\node[qbox] (q) at (1.05,9.25) {query\\$q(A)$};
+\draw[flow] (q.east) -- (2.38,9.25);                   % starts on the query box, whatever its text measures
+\begin{scope}[shift={(7.2,9.25)}]\input{frag/sphere_glyph.tex}\end{scope}
+\node[lbl] at (7.20,10.85) {embedding space};
+\draw[flow] (5.25,9.25) -- (6.13,9.25);
+\draw[flow] (8.27,9.25) -- (11.94,9.25);
+\node[lbl, anchor=south] at (10.20,9.32) {$\hat y_A$};
+
+% ---- the target rises into the one loss box, with the stop-gradient slashes on its riser
+\draw[flowbare] (11.33,6.83) -- (12.44,6.83);
+\draw[flow] (12.44,6.83) -- (12.44,8.79);
+\stopgrad{12.44,7.75}
+\node[lbl, anchor=west] at (12.58,8.28) {$y_A$};
+\node[loss] at (12.44,9.25) {$\mathcal{L}$};
+\end{tikzpicture}
+\end{document}
